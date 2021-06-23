@@ -22,7 +22,6 @@ install_requires = ['aiohttp==3.6.2',
                     'pytz==2019.3',
                     'bcrypt==3.1.7',
                     'aiohttp_session==2.9.0',
-                    'aiohttp_admin>=0.0.3',
                     # TODO: Update trafaret to 2.0.x (blocked by issue #487)
                     'trafaret==1.2.0',
                     'aiohttp_jinja2==1.2.0',

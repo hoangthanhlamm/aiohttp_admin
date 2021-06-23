@@ -18,7 +18,6 @@ user = t.Dict({
 message = t.Dict({
     t.Key('_id'): MongoId(),
     t.Key('author_id'): MongoId(),
-    t.Key('username'): t.String(max_length=50),
     t.Key('text'): t.String(),
     t.Key('pub_date'): DateTime(),
     # t.Key('likes'): t.Int,

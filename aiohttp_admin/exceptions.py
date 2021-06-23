@@ -29,7 +29,7 @@ class ObjectNotFound(AdminRESTError):
     error = "Object not found"
 
 
-class JsonValidaitonError(AdminRESTError):
+class JsonValidationError(AdminRESTError):
     status_code = 400
     error = "Invalid json payload"
 

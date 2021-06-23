@@ -4,7 +4,7 @@ import trafaret as t
 
 from bson import ObjectId
 
-from aiohttp_admin.exceptions import JsonValidaitonError
+from aiohttp_admin.exceptions import JsonValidationError
 from aiohttp_admin.utils import (validate_query_structure, jsonify,
                                  validate_payload, as_dict, SimpleType)
 
@@ -62,7 +62,7 @@ def test_validate_query_numeric_string():
 def test_validate_query_filters_is_not_json():
     query = {'_filters': 'foo'}
 
-    with pytest.raises(JsonValidaitonError) as ctx:
+    with pytest.raises(JsonValidationError) as ctx:
         validate_query_structure(query)
     error = json.loads(ctx.value.text)
     assert error['error'] == '_filters field can not be serialized'
@@ -71,7 +71,7 @@ def test_validate_query_filters_is_not_json():
 def test_validate_query_filters_invalid():
     query = {'_filters': json.dumps({'foo': {'bar': 'baz'}})}
 
-    with pytest.raises(JsonValidaitonError) as ctx:
+    with pytest.raises(JsonValidationError) as ctx:
         validate_query_structure(query)
 
     error = json.loads(ctx.value.text)
@@ -110,7 +110,7 @@ def test_validate_payload_not_json():
         t.Key('foo'): t.Atom('bar')
     })
 
-    with pytest.raises(JsonValidaitonError) as ctx:
+    with pytest.raises(JsonValidationError) as ctx:
         validate_payload(raw_data, schema)
 
     error = json.loads(ctx.value.text)
@@ -123,7 +123,7 @@ def test_validate_payload_not_valid_schema():
         t.Key('foo'): t.Atom('bar')
     })
 
-    with pytest.raises(JsonValidaitonError) as ctx:
+    with pytest.raises(JsonValidationError) as ctx:
         validate_payload(raw_data, schema)
 
     error = json.loads(ctx.value.text)

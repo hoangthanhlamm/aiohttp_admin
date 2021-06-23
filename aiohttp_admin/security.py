@@ -13,7 +13,7 @@ from aiohttp_security.api import AUTZ_KEY
 from .exceptions import JsonForbiddenError
 
 
-__all__ = ["Permissions", "require", "authorize"]
+__all__ = ["Permissions", "require", "authorize", "DummyAuthPolicy", "DummyTokenIdentityPolicy"]
 
 
 class Permissions(str, Enum):
@@ -76,13 +76,13 @@ class DummyAuthPolicy(AdminAbstractAuthorizationPolicy):
 class DummyTokenIdentityPolicy(AbstractIdentityPolicy):
 
     def __init__(self, server_secret=None):
-        '''
+        """
             Makes identity tokens using HMAC(SHA-512) over a
             server-side secret.
 
             Provide a secret (20+ bytes) or we'll pick one
             at runtime.
-        '''
+        """
 
         if server_secret is None:
             server_secret = os.urandom(32)
@@ -106,7 +106,7 @@ class DummyTokenIdentityPolicy(AbstractIdentityPolicy):
 
     async def remember(self, request, response, identity, **kwargs):
         # save token in storage and reply to client
-        response.headers['X-Token'] = identity+':'+self._make_hmac(identity)
+        response.headers['X-Token'] = identity + ':' + self._make_hmac(identity)
 
     async def forget(self, request, response):
         token = request.headers.get("Authorization")

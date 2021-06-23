@@ -1,4 +1,5 @@
 import json
+from bson import ObjectId
 
 from collections import namedtuple
 from datetime import datetime, date
@@ -8,21 +9,12 @@ from types import MappingProxyType
 import trafaret as t
 from aiohttp import web
 
-from .exceptions import JsonValidaitonError
-from .consts import TEMPLATES_ROOT
+from .exceptions import JsonValidationError
 
-try:
-    from bson import ObjectId
-except ImportError:  # pragma: no cover
-    ObjectId = None
+__all__ = ['json_response', 'jsonify', 'validate_query', 'validate_payload', 'calc_pagination', 'ASC', 'LoginForm', 'MULTI_FIELD_TEXT_QUERY', 'as_dict']
 
 
-__all__ = ['json_response', 'jsonify', 'validate_query', 'validate_payload',
-           'gather_template_folders']
-
-
-PagingParams = namedtuple('PagingParams',
-                          ['limit', 'offset', 'sort_field', 'sort_dir'])
+PagingParams = namedtuple('PagingParams', ['limit', 'offset', 'sort_field', 'sort_dir'])
 MULTI_FIELD_TEXT_QUERY = 'q'
 
 
@@ -65,8 +57,8 @@ DESC = 'DESC'
 
 
 ListQuery = t.Dict({
-    OptKey('_page', default=1): t.ToInt[1:],
-    OptKey('_perPage', default=30): t.ToInt[1:],
+    OptKey('_page', default=1): t.Int[1:],
+    OptKey('_perPage', default=30): t.Int[1:],
     OptKey('_sortField'): t.String,
     OptKey('_sortDir', default=DESC): t.Enum(DESC, ASC),
 
@@ -91,14 +83,14 @@ def validate_query_structure(query):
             f = json.loads(filters)
         except ValueError:
             msg = '_filters field can not be serialized'
-            raise JsonValidaitonError(msg)
+            raise JsonValidationError(msg)
         else:
             query_dict['_filters'] = f
     try:
         q = ListQuery(query_dict)
     except t.DataError as exc:
         msg = '_filters query invalid'
-        raise JsonValidaitonError(msg, **as_dict(exc))
+        raise JsonValidationError(msg, **as_dict(exc))
 
     return q
 
@@ -108,25 +100,13 @@ def validate_payload(raw_payload, schema):
     try:
         parsed = json.loads(payload)
     except ValueError:
-        raise JsonValidaitonError('Payload is not json serialisable')
+        raise JsonValidationError('Payload is not json serialisable')
 
     try:
         data = schema(parsed)
     except t.DataError as exc:
-        raise JsonValidaitonError(**as_dict(exc))
+        raise JsonValidationError(**as_dict(exc))
     return data
-
-
-def gather_template_folders(template_folder):
-    # gather template folders: default and provided
-    if not isinstance(template_folder, list):
-        template_folder = [template_folder]
-    template_root = str(TEMPLATES_ROOT)
-    if template_folder is None:
-        template_folders = [template_root]
-    else:
-        template_folders = [template_root] + template_folder
-    return template_folders
 
 
 def validate_query(query, possible_columns):
@@ -144,7 +124,7 @@ def validate_query(query, possible_columns):
     if not_valid:
         column_list = ', '.join(not_valid)
         msg = 'Columns: {} do not present in resource'.format(column_list)
-        raise JsonValidaitonError(msg)
+        raise JsonValidationError(msg)
     return MappingProxyType(q)
 
 
